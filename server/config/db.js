@@ -1,7 +1,7 @@
 // server/config/db.js
 const { MongoClient } = require('mongodb');
-let client1 = null;
-let client0 = null;
+let client1 = null; //MDB v. 7.0
+let client0 = null; //MDB v. 8.0
 let db1 = null;
 let db0 = null;
 

@@ -82,13 +82,13 @@ exports.getPrices = async (req, res) => {
         }
       }
     }
-    console.log('[MongoDB] Aggregation explain plan:', JSON.stringify(explain, null, 2));
+    //console.log('[MongoDB] Aggregation explain plan:', JSON.stringify(explain, null, 2));
 
     const start = Date.now();
     const data = await collection.aggregate(pipeline).toArray();
     const execTime = Date.now() - start;
     const sizeKB = Buffer.byteLength(JSON.stringify(data)) / 1024;
-    console.log(`[MongoDB] Query execution time (Node wall): ${execTime} ms, MongoDB executionTimeMillis: ${explainExecTime} ms, Documents returned: ${data.length}, Response size: ${sizeKB.toFixed(2)} KB`);
+    //console.log(`[MongoDB] Query execution time (Node wall): ${execTime} ms, MongoDB executionTimeMillis: ${explainExecTime} ms, Documents returned: ${data.length}, Response size: ${sizeKB.toFixed(2)} KB`);
     res.json({
       data,
       meta: {
