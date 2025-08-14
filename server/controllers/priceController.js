@@ -1,39 +1,6 @@
 // server/controllers/priceController.js
 
-const { MongoClient } = require('mongodb');
-let client1 = null;
-let client0 = null;
-let db1 = null;
-let db0 = null;
-
-// Called at server startup
-async function connectAllClusters() {
-  if (!client1) {
-    try {
-      client1 = new MongoClient(process.env.CLUSTER1_URI);
-      await client1.connect();
-      db1 = client1.db('crypto_db');
-      console.log('Connected to MongoDB Cluster1');
-    } catch (err) {
-      db1 = null;
-      console.warn('Warning: Could not connect to MongoDB Cluster1:', err.message);
-    }
-  }
-  if (!client0) {
-    try {
-      client0 = new MongoClient(process.env.CLUSTER0_URI);
-      await client0.connect();
-      db0 = client0.db('crypto_db');
-      console.log('Connected to MongoDB Cluster0');
-    } catch (err) {
-      db0 = null;
-      console.warn('Warning: Could not connect to MongoDB Cluster0:', err.message);
-    }
-  }
-}
-
-// Export for server.js to call at startup
-exports.connectAllClusters = connectAllClusters;
+const { getClusterDb } = require('../config/db');
 
 // Helper to get collection by symbol
 function getCollection(symbol, useRaw) {
@@ -47,20 +14,11 @@ exports.getPrices = async (req, res) => {
   try {
     const { symbol, cluster, window, useRaw } = req.query;
     const collectionName = getCollection(symbol, useRaw);
-    let db, collection;
-    if (cluster === '0') {
-      if (!db0) {
-        return res.status(503).json({ error: 'MongoDB Cluster 0 is unavailable.' });
-      }
-      db = db0;
-      collection = db0.collection(collectionName);
-    } else {
-      if (!db1) {
-        return res.status(503).json({ error: 'MongoDB Cluster 1 is unavailable.' });
-      }
-      db = db1;
-      collection = db1.collection(collectionName);
+    const db = getClusterDb(cluster);
+    if (!db) {
+      return res.status(503).json({ error: `MongoDB Cluster ${cluster} is unavailable.` });
     }
+    const collection = db.collection(collectionName);
     // Aggregation pipeline: filter last 10 days, optionally 10-day rolling average
     const now = new Date();
     const tenDaysAgo = new Date(now);

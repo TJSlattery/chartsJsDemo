@@ -2,7 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { connectAllClusters } = require('./controllers/priceController');
+const { connectAllClusters } = require('./config/db');
 
 const app = express();
 app.use(cors());
