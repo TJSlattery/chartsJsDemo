@@ -11,10 +11,7 @@ app.use(express.json());
 
 
 // Connect to all MongoDB clusters at startup
-connectAllClusters().catch(err => {
-  console.error('Failed to connect to MongoDB clusters:', err);
-  process.exit(1);
-});
+connectAllClusters();
 
 // Simple test route
 app.get('/test', (req, res) => res.send('Test route working'));

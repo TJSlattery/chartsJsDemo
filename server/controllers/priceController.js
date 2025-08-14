@@ -9,16 +9,26 @@ let db0 = null;
 // Called at server startup
 async function connectAllClusters() {
   if (!client1) {
-    client1 = new MongoClient(process.env.CLUSTER1_URI);
-    await client1.connect();
-    db1 = client1.db('crypto_db');
-    console.log('Connected to MongoDB Cluster1');
+    try {
+      client1 = new MongoClient(process.env.CLUSTER1_URI);
+      await client1.connect();
+      db1 = client1.db('crypto_db');
+      console.log('Connected to MongoDB Cluster1');
+    } catch (err) {
+      db1 = null;
+      console.warn('Warning: Could not connect to MongoDB Cluster1:', err.message);
+    }
   }
   if (!client0) {
-    client0 = new MongoClient(process.env.CLUSTER0_URI);
-    await client0.connect();
-    db0 = client0.db('crypto_db');
-    console.log('Connected to MongoDB Cluster0');
+    try {
+      client0 = new MongoClient(process.env.CLUSTER0_URI);
+      await client0.connect();
+      db0 = client0.db('crypto_db');
+      console.log('Connected to MongoDB Cluster0');
+    } catch (err) {
+      db0 = null;
+      console.warn('Warning: Could not connect to MongoDB Cluster0:', err.message);
+    }
   }
 }
 
@@ -26,7 +36,8 @@ async function connectAllClusters() {
 exports.connectAllClusters = connectAllClusters;
 
 // Helper to get collection by symbol
-function getCollection(symbol) {
+function getCollection(symbol, useRaw) {
+  if (symbol === 'BTC/USD' && useRaw === '1') return 'btc_raw';
   if (symbol === 'BTC/USD') return 'mock_btc_minutes';
   if (symbol === 'ETH/USD') return 'mock_eth_minutes';
   return 'mock_btc_minutes';
@@ -34,13 +45,19 @@ function getCollection(symbol) {
 
 exports.getPrices = async (req, res) => {
   try {
-    const { symbol, cluster, window } = req.query;
-    const collectionName = getCollection(symbol);
+    const { symbol, cluster, window, useRaw } = req.query;
+    const collectionName = getCollection(symbol, useRaw);
     let db, collection;
     if (cluster === '0') {
+      if (!db0) {
+        return res.status(503).json({ error: 'MongoDB Cluster 0 is unavailable.' });
+      }
       db = db0;
       collection = db0.collection(collectionName);
     } else {
+      if (!db1) {
+        return res.status(503).json({ error: 'MongoDB Cluster 1 is unavailable.' });
+      }
       db = db1;
       collection = db1.collection(collectionName);
     }
@@ -51,6 +68,7 @@ exports.getPrices = async (req, res) => {
     const pipeline = [
       {
         $match: {
+          symbol: symbol,
           timestamp: {
             $gte: tenDaysAgo
           }

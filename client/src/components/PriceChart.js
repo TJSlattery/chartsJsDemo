@@ -18,18 +18,19 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, zoomPlugin);
 
 
-function PriceChart({ symbol, cluster, windowFn }) {
+function PriceChart({ symbol, cluster, windowFn, useRaw }) {
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState(null);
   // Prevent horizontal scroll while dragging to zoom or pan
   const [isDragging, setIsDragging] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const chartRef = useRef();
 
   useEffect(() => {
     setLoading(true);
     setMeta(null);
-    axios.get(`/api/prices?symbol=${symbol}&limit=1000&cluster=${cluster}&window=${windowFn}`)
+    axios.get(`/api/prices?symbol=${symbol}&limit=1000&cluster=${cluster}&window=${windowFn}&useRaw=${useRaw}`)
       .then(res => {
         const { data, meta } = res.data;
         setMeta(meta);
@@ -71,14 +72,14 @@ function PriceChart({ symbol, cluster, windowFn }) {
         });
         setLoading(false);
       });
-  }, [symbol, cluster, windowFn]);
+  }, [symbol, cluster, windowFn, useRaw, refreshKey]);
 
   const options = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: `${symbol} Price (last 1000 days)` },
+      title: { display: true, text: `${symbol} Price (last 10 days)` },
       zoom: {
         zoom: {
           drag: { enabled: true },
@@ -163,16 +164,24 @@ function PriceChart({ symbol, cluster, windowFn }) {
           <span><b>Size:</b> {meta.responseSizeKB} KB</span>
         </div>
       )}
-      <button
-        style={{ marginBottom: 12 }}
-        onClick={() => {
-          if (chartRef.current) {
-            chartRef.current.resetZoom();
-          }
-        }}
-      >
-        Reset Zoom
-      </button>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+        <button
+          onClick={() => setRefreshKey(k => k + 1)}
+          style={{ padding: '6px 18px', borderRadius: 6, border: '1px solid #bbb', background: '#f5f5f5', cursor: 'pointer', fontWeight: 500 }}
+        >
+          Rerun Query
+        </button>
+        <button
+          onClick={() => {
+            if (chartRef.current) {
+              chartRef.current.resetZoom();
+            }
+          }}
+          style={{ padding: '6px 18px', borderRadius: 6, border: '1px solid #bbb', background: '#f5f5f5', cursor: 'pointer', fontWeight: 500 }}
+        >
+          Reset Zoom
+        </button>
+      </div>
       <div
         style={{ width: '100%', overflowX: isDragging ? 'hidden' : 'auto' }}
       >

@@ -6,6 +6,12 @@ function App() {
   const [symbol, setSymbol] = useState('BTC/USD');
   const [useCluster0, setUseCluster0] = useState(false);
   const [showWindow, setShowWindow] = useState(false);
+  const [useRaw, setUseRaw] = useState(false);
+
+  // Reset useRaw if symbol is not BTC
+  React.useEffect(() => {
+    if (symbol !== 'BTC/USD' && useRaw) setUseRaw(false);
+  }, [symbol]);
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
@@ -31,8 +37,18 @@ function App() {
           />
           {' '}Show 10-day Rolling Average
         </label>
+        {symbol === 'BTC/USD' && (
+          <label style={{ marginLeft: 16 }}>
+            <input
+              type="checkbox"
+              checked={useRaw}
+              onChange={e => setUseRaw(e.target.checked)}
+            />
+            {' '}Use Raw Data
+          </label>
+        )}
       </div>
-      <PriceChart symbol={symbol} cluster={useCluster0 ? 0 : 1} windowFn={showWindow ? 1 : 0} />
+      <PriceChart symbol={symbol} cluster={useCluster0 ? 0 : 1} windowFn={showWindow ? 1 : 0} useRaw={useRaw ? 1 : 0} />
     </div>
   );
 }
