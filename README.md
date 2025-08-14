@@ -1,26 +1,21 @@
 # Crypto Price Visualization (MERN + Chart.js)
 
 ## Overview
-This web application visualizes historical Bitcoin and Ethereum price data using interactive charts. It is built with the MERN stack (MongoDB, Express, React, Node.js) and uses Chart.js for rich, interactive plotting. The backend supports advanced MongoDB aggregation queries, including rolling averages and time series analytics, and the frontend provides a modern UI for exploring and comparing crypto price trends.
+This web application visualizes historical Bitcoin and Ethereum price data using interactive charts. It is built with the MERN stack (MongoDB, Express, React, Node.js) and uses Chart.js for interactive plotting. The backend supports MongoDB aggregation queries, including rolling averages and time series analytics.
 
 ## Features
 - **Interactive Charting**: Zoom, pan, and reset chart views with Chart.js.
 - **Rolling Average**: Toggle a 10-day rolling average overlay for price smoothing.
-- **Cluster Selection**: Switch between two MongoDB Atlas clusters (v6.x and v8.x) for performance and compatibility testing.
+- **Cluster Selection**: Switch between two MongoDB Atlas clusters (v7.x and v8.x) for performance and compatibility testing.
 - **Raw Data Option**: For Bitcoin, toggle between time series and raw data collections.
 - **Query Metadata**: View query execution time, document count, and response size for each request.
-- **Rerun Query**: Instantly refresh the chart with the latest data and aggregation results.
-
-## Why This App?
-- **Performance Analysis**: Compare query performance and aggregation capabilities across MongoDB versions and collection types.
-- **Data Exploration**: Easily visualize and analyze large volumes of crypto price data.
-- **Modern Stack**: Demonstrates best practices for full-stack development with MERN and Chart.js.
+- **Rerun Query**: Refresh the chart with the latest data and aggregation results.
 
 ## How to Run
 
 ### Prerequisites
-- Node.js (v18+ recommended)
-- MongoDB Atlas clusters (with mock BTC/ETH data loaded)
+- Node.js
+- MongoDB Atlas clusters
 - Python (for running data generation scripts)
 
 ### 1. Clone the Repository
@@ -32,8 +27,8 @@ cd chartsJsDemo
 ### 2. Configure Environment Variables
 Edit the `.env` file in the `server/` directory:
 ```
-CLUSTER0_URI="mongodb+srv://<user>:<pass>@cluster0.mongodb.net/crypto_db?w=1"
-CLUSTER1_URI="mongodb+srv://<user>:<pass>@cluster1.mongodb.net/crypto_db?w=1"
+CLUSTER0_URI="mongodb+srv://<user>:<pass>@cluster0.mongodb.net/crypto_db"
+CLUSTER1_URI="mongodb+srv://<user>:<pass>@cluster1.mongodb.net/crypto_db"
 PORT=8080
 ```
 
